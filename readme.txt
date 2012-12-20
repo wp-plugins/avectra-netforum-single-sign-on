@@ -8,7 +8,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Netforum Single Sign on. Allows users to sign in to wordpress using Avectra Netforum credentials.
+NetForum Pro Single Sign on. Allows users to sign in to wordpress using Avectra NetForum Pro credentials.
 
 
 == Description ==
@@ -16,7 +16,7 @@ Netforum Single Sign on. Allows users to sign in to wordpress using Avectra Netf
 
 == Installation ==
 
-Netforum SSO plugin uses the Netforum xWeb web services to authenticate users. This allows
+Netforum Pro SSO plugin uses the Netforum xWeb web services to authenticate users. This allows
 for Single Sign on Capabilities, where users can sign in to Wordpress using their Netforum
 credentials (username and password).
 
@@ -54,6 +54,8 @@ append this SSO Token to the hyperlinks to Netforum. This way the users can navi
 Netforum and not have to login again.  The SSO token is saved as the user_netforum_sso
 field in the user metadata in Wordpress.
 
+= Does it work with NetForum Enterpsie? =
+With minor modifications it will work. But this particular free plug-in is designed and tested to work with NetForum Pro.
 
 == Screenshots ==
 
