@@ -59,7 +59,7 @@ With minor modifications it will work. But this particular free plug-in is desig
 
 == Screenshots ==
 
-1. Plugin options
+1. Plugin Settings. Enter your xWeb credentials here (received from Avectra)
 
 
 == Changelog ==
