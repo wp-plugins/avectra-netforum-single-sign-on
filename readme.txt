@@ -12,7 +12,7 @@ NetForum Pro Single Sign on. Allows users to sign in to wordpress using Avectra 
 
 
 == Description ==
-This plug-in allows for Single Sign on between netForum and Wordpress. Users can sign in to Wordpress using their netForum credentials.
+Contributed by fusionSpan (www.fusionspan.com). This plug-in allows for Single Sign on between netForum and Wordpress. Users can sign in to Wordpress using their netForum credentials.
 
 We have additional plug-ins available that compliment this SSO plug-in. Listed below
 
