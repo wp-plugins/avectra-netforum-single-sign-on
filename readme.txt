@@ -3,7 +3,7 @@ Contributors: gkher
 Donate link: http://fusiopnspan.com/
 Tags: avectra, netforum, sso
 Requires at least: 3.0.1
-Tested up to: 3.8
+Tested up to: 3.8.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -12,7 +12,13 @@ NetForum Pro Single Sign on. Allows users to sign in to wordpress using Avectra 
 
 
 == Description ==
+This plug-in allows for Single Sign on between netForum and Wordpress. Users can sign in to Wordpress using their netForum credentials.
 
+We have additional plug-ins available that compliment this SSO plug-in. Listed below
+
+* Security Groups (Free) - Allows you to restrict content on your Wordpress CMS site, based on the users Membership status
+
+* SSO with Bi-directional sync - In addition to basic SSO, this plug-in allows you to manage (create/update/delete) users in Wordpress, and this information is automatically synched back to netForum. Wordpress users can edit their profile and their information is automatically updated in netForum. Adds additional fields to the Wordpress user profile and allows for field mapping between Wordpress and netForum. Contact support@fusionspan.com if you would like a demo.
 
 == Installation ==
 
