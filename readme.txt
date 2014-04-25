@@ -76,8 +76,9 @@ echo 'netForum SSO Token is: ' . $ssoToken . '';
 * The above example uses the “Insert PHP WordPress Plugin”. 
 
 
-= Does it work with netForum Enterpsie? =
-With minor modifications it will work. But this particular free plug-in is designed and tested to work with netForum Pro.
+= Does it work with netForum Enterprise? =
+It most likely does, since we don’t have access to an enterprise installation, we have not tested it. 
+
 
 == Screenshots ==
 
