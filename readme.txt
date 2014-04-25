@@ -80,7 +80,9 @@ if(is_user_logged_in()){
 
 
 = Does it work with netForum Enterprise? =
-It most likely does, since we don’t have access to an enterprise installation, we have not tested it. 
+It most likely does, but we have not tested it with netForum enterprise. Since the
+netForum xWeb services are the same when it comes to authentication, so this plug-in should work. If not, send us
+an email and we can help you tweak it to work with your netForum enterprise installation.
 
 
 == Screenshots ==
