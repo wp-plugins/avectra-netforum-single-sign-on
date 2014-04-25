@@ -60,6 +60,25 @@ append this SSO Token to the hyperlinks to netForum. This way the users can navi
 netForum and not have to login again.  The SSO token is saved as the user_netforum_sso
 field in the user metadata in Wordpress.
 
+To use it in a page or post, you will need to install another plug-in (there are several), that will allow
+inline php code in your page. And something like the snippet below will then work.
+
+[insert_php]
+if(is_user_logged_in()){
+$current_user = wp_get_current_user();
+$user_id = $current_user->ID;
+$ssoToken = get_user_meta($user_id, 'user_netforum_sso', true);
+echo 'netForum SSO Token is: ' . $ssoToken . '';
+}
+[/insert_php]
+
+
+
+
+
+
+
+
 = Does it work with netForum Enterpsie? =
 With minor modifications it will work. But this particular free plug-in is designed and tested to work with netForum Pro.
 
