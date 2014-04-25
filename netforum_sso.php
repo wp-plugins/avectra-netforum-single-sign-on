@@ -86,12 +86,12 @@ class NetforumSSO
      */
     function netforum_sso_auth($user, $username = '', $password = '')
     {
-//        todo check if this is correct - too many checks
-        //see if user is not already authenticate
+        //see if user is not already authenticated
         if (!is_user_logged_in() &&
-                $username != '' &&
-                $password != '' &&
-             $this->authenticator != null
+            $username != '' &&
+            strrpos($username, "@") > 0 &&
+            $password != '' &&
+            $this->authenticator != null
         ) {
             $ssoToken = '';
             $memberName = $username;
@@ -114,7 +114,7 @@ class NetforumSSO
                 }
 
                 $user = new WP_User($user->ID);
-                update_user_meta( $user->ID, 'user_netforum_sso', $ssoToken );
+                update_user_meta($user->ID, 'user_netforum_sso', $ssoToken);
             }
         }
         return $user;
