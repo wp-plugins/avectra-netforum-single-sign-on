@@ -63,20 +63,17 @@ field in the user metadata in Wordpress.
 To use it in a page or post, you will need to install another plug-in (there are several), that will allow
 inline php code in your page. And something like the snippet below will then work.
 
-[insert_php]
+‘[insert_php]
 if(is_user_logged_in()){
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 $ssoToken = get_user_meta($user_id, 'user_netforum_sso', true);
 echo 'netForum SSO Token is: ' . $ssoToken . '';
 }
-[/insert_php]
+[/insert_php]’
 
 
-
-
-
-
+* The above example uses the “Insert PHP WordPress Plugin” 
 
 
 = Does it work with netForum Enterpsie? =
