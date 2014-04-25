@@ -73,7 +73,7 @@ echo 'netForum SSO Token is: ' . $ssoToken . '';
 [/insert_php]`
 
 
-* The above example uses the “Insert PHP WordPress Plugin” 
+* The above example uses the “Insert PHP WordPress Plugin”. 
 
 
 = Does it work with netForum Enterpsie? =
