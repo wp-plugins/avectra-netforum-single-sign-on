@@ -1,5 +1,5 @@
 === netForum SSO  ===
-Contributors: gkher
+Contributors: fusionspan
 Donate link: http://fusiopnspan.com/
 Tags: avectra, netforum, sso
 Requires at least: 3.0.1
@@ -55,10 +55,10 @@ their netForum credentials. Users need to navigate to netForum to change/update 
 
 = How can I create hyperlinks to netForum so that the wordpress user doesn't have to login again? =
 
-The netforum_sso plugin saves the users xWeb single sign on token as user metadata in Wordpress. You need to
-append this SSO Token to the hyperlinks to netForum. This way the users can navigate over to
+The netforum_sso plugin saves the users xWeb single sign on token as a session variable in Wordpress.
+You need to append this SSO Token to the hyperlinks to netForum. This way the users can navigate over to
 netForum and not have to login again.  The SSO token is saved as the user_netforum_sso
-field in the user metadata in Wordpress.
+PHP session variable in Wordpress.
 
 To use it in a page or post, you will need to install another plug-in (there are several), that will allow
 inline php code in your page. And something like the snippet below will then work.
@@ -66,11 +66,7 @@ inline php code in your page. And something like the snippet below will then wor
 `[insert_php]
 
 if(is_user_logged_in()){
-  $current_user = wp_get_current_user();
-  $user_id = $current_user->ID;
-  $ssoToken = get_user_meta($user_id, 'user_netforum_sso', true);
-
-  echo 'netForum SSO Token is: ' . $ssoToken . '';
+  echo 'netForum SSO Token is: ' .$_SESSION['user_netforum_sso'];
 }
 
 [/insert_php]`
@@ -95,8 +91,16 @@ an email and we can help you tweak it to work with your netForum enterprise inst
 = 1.0 =
 * First release.
 
+= 1.1 =
+* Upgraded to Wordpress 3.9
+* New session variable $_SESSION['user_netforum_sso'] stores the netForum SSO Token
+
+
 == Upgrade Notice ==
 
 = 1.0 =
 First release
+
+= 1.1 =
+* Upgraded to Wordpress 3.9
 

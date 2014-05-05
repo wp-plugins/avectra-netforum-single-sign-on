@@ -29,6 +29,7 @@ Domain Path: /lang
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+session_start();
 require_once('netforum_sso_options.php');
 
 class NetforumSSO
@@ -63,8 +64,9 @@ class NetforumSSO
             $this->authenticator = new AuthenticationFunctions($ssoUrl, $ssoGlobalUser, $ssoGlobalPassword);
         }
         add_action('login_form', array($this, 'loginform'));
-        add_filter('authenticate', array($this, 'netforum_sso_auth'), 50, 3);
+        add_action('wp_logout', array($this, 'netforum_logout'));
 
+        add_filter('authenticate', array($this, 'netforum_sso_auth'), 50, 3);
     }
 
 
@@ -111,14 +113,29 @@ class NetforumSSO
                 if (!$user) {
                     $user_id = wp_create_user($username, '', $username);
                     wp_update_user(array('ID' => $user_id, 'display_name' => $memberName, 'user_identity' => $memberName));
+                    $user = get_user_by('login', $username);
                 }
 
                 $user = new WP_User($user->ID);
                 update_user_meta($user->ID, 'user_netforum_sso', $ssoToken);
+                $_SESSION['user_netforum_sso'] = $ssoToken;
             }
         }
         return $user;
     }
+
+    /**
+     * Clear out session
+     */
+    function netforum_logout()
+    {
+        unset($_SESSION['user_netforum_sso']);
+        $current_user = wp_get_current_user();
+        if ($current_user != null) {
+            delete_user_meta($current_user->ID, 'user_netforum_sso');
+        }
+    }
+
 } // end class
 
 new NetforumSSO;
