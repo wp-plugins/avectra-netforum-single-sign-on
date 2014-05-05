@@ -88,13 +88,12 @@ an email and we can help you tweak it to work with your netForum enterprise inst
 
 == Changelog ==
 
-= 1.0 =
-* First release.
-
 = 1.1 =
 * Upgraded to Wordpress 3.9
 * New session variable $_SESSION['user_netforum_sso'] stores the netForum SSO Token
 
+= 1.0 =
+* First release.
 
 == Upgrade Notice ==
 
