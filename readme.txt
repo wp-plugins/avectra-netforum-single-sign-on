@@ -97,9 +97,10 @@ an email and we can help you tweak it to work with your netForum enterprise inst
 
 == Upgrade Notice ==
 
+= 1.1 =
+* Upgraded to Wordpress 3.9
+
 = 1.0 =
 First release
 
-= 1.1 =
-* Upgraded to Wordpress 3.9
 
