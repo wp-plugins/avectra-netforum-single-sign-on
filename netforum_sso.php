@@ -4,9 +4,9 @@ Plugin Name: Netforum SSO
 Plugin URI: http://fusionspan.com/technology-services/netforum-integration-with-wordpress
 Description: Netforum Single Sign on for WordPress using Netforum xWeb SSO service.
 Author: Gayathri Kher
-Version: 1.0
-Author URI: http://fusionspan.com
-Compatibility: WordPress 3.4.1
+Version: 1.1
+Author URI: http://www.fusionspan.com
+Compatibility: WordPress 3.9
 Text Domain: netforum-sso
 Domain Path: /lang
 
