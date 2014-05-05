@@ -1,5 +1,5 @@
 === netForum SSO  ===
-Contributors: fusionspan
+Contributors: gkher
 Donate link: http://fusiopnspan.com/
 Tags: avectra, netforum, sso
 Requires at least: 3.0.1
@@ -101,6 +101,6 @@ an email and we can help you tweak it to work with your netForum enterprise inst
 * Upgraded to Wordpress 3.9
 
 = 1.0 =
-First release
+* First release
 
 
