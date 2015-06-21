@@ -21,25 +21,55 @@ We have additional plug-ins available that compliment this SSO plug-in. Listed b
 * SSO with Bi-directional sync - In addition to basic SSO, this plug-in allows you to manage (create/update) users in Wordpress, and this information is automatically synched back to netForum. Wordpress users can edit their profile and their information is automatically updated in netForum. Adds additional fields to the Wordpress user profile and allows for field mapping between Wordpress and netForum. Contact support@fusionspan.com if you would like a demo.
 
 == Installation ==
+1. Install composer by running the following commands:
+```
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+```
 
-netforum Pro SSO plugin uses the netForum xWeb web services to authenticate users. This allows
-for Single Sign on Capabilities, where users can sign in to Wordpress using their netforum
-credentials (username and password).
+2. Create a directory in `wp-content` called `composer`.
 
-For this plug-in to work, you need to have a xWeb service available. xWeb is available to all
-netforum Team and Pro subscriptions.
-
-e.g.
-
-1. Unzip the `netforum_sso.zip` in to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go into the Wordpress Dashboard  and configure the plugin by going into
-   Settings -> netForum SSO
-   The following options need to be configured
-
-   xWeb Single SignOn WSDL URL - is the URL for the netForum xWeb SSO web service
-   xWeb Admin Username - The username for the xWeb service
-   xWeb Admin Username - The password for the xWeb service
+3. Create a new file in `wp-content/composer` called `composer.json` and paste the following contents:
+```
+{
+    "config" : {
+        "vendor-dir" : ""
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/netforum.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-bootstrap.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-netauth.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-netgroups.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "composer/installers" : "~1.0",
+        "fusionspan/netforum": "dev-master",
+        "fsahsen/wp-bootstrap": "dev-master",
+        "fsahsen/wp-netauth": "dev-master",
+        "fsahsen/wp-netgroups": "dev-master"
+    },
+    "extra" : {
+        "installer-paths": {
+            "../plugins/{$name}/": ["type:wordpress-plugin"]
+        }
+    },
+    "minimum-stability": "dev"
+}
+```
+4. run `composer update` composer will automatically install the necessary plugins.
    
 
 == Frequently Asked Questions ==
@@ -103,4 +133,55 @@ an email and we can help you tweak it to work with your netForum enterprise inst
 = 1.0 =
 * First release
 
+ng Started
+
+1. Install composer by running the following commands:
+```
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+```
+
+2. Create a directory in `wp-content` called `composer`.
+
+3. Create a new file in `wp-content/composer` called `composer.json` and paste the following contents:
+```
+{
+    "config" : {
+        "vendor-dir" : ""
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/netforum.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-bootstrap.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-netauth.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://fsahsen@bitbucket.org/fsahsen/wp-netgroups.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "composer/installers" : "~1.0",
+        "fusionspan/netforum": "dev-master",
+        "fsahsen/wp-bootstrap": "dev-master",
+        "fsahsen/wp-netauth": "dev-master",
+        "fsahsen/wp-netgroups": "dev-master"
+    },
+    "extra" : {
+        "installer-paths": {
+            "../plugins/{$name}/": ["type:wordpress-plugin"]
+        }
+    },
+    "minimum-stability": "dev"
+}
+```
+4. run `composer update` composer will automatically install the necessary plugins.
 
