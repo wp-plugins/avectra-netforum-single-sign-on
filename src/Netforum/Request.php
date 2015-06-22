@@ -1,9 +1,264 @@
-<?php
-namespace Netforum; use Netforum\Traits\SingletonTrait; use Netforum\Exceptions\RuntimeException; class Request extends \SoapClient { use SingletonTrait; protected $_06f8fc86808e; protected $_d1adf5959a77; protected $_b87f4446ef83; protected $_63c893b63ee7; public function __construct($spb22f69, array $sp0cb472) { $this->_06f8fc86808e = (object) $sp0cb472; $this->_bb5ac75b43dc = $spb22f69; $this->_ba9835bd162f = $this->constructParams($sp0cb472); parent::__construct($spb22f69, $this->_ba9835bd162f); return $this; } public function getTimeout() { return (int) $this->_06f8fc86808e->_0877bbd39ed4; } public function setTimeout(int $spda50c8) { $this->_06f8fc86808e->_0877bbd39ed4 = $spda50c8; } public function getSoapVersion() { return SOAP_1_2; } protected function constructParams(array $spddf6c9) { if ($this->_06f8fc86808e->_d4f1d7eed761) { $spddf6c9 += array('trace' => true); } $spddf6c9 += array('exceptions' => true, 'soap_version' => $this->getSoapVersion(), 'connection_timeout' => $this->getTimeout(), 'default_socket_timeout' => $this->getTimeout(), 'cache_wsdl' => WSDL_CACHE_BOTH, 'features' => SOAP_SINGLE_ELEMENT_ARRAYS, 'encoding' => 'UTF-8', 'user_agent' => 'NetForum Api (Simple) by FusionSpan llc.'); return array_filter($spddf6c9); } public function __doRequest($spae3035, $sp645ec4, $sp38d280, $spe7b96f, $sp6b31d8 = 0) { ini_set('default_socket_timeout', $this->getTimeout()); if ($this->_06f8fc86808e->_d4f1d7eed761) { dd(colorize(' >>> Sending Request _______', 'blue')); dd(colorize('Params: 
-Request: ' . prettyXML($spae3035) . "\nLocation: {$sp645ec4}\nAction: {$sp38d280}\nVersion: {$spe7b96f}", 'blue')); dd(colorize('________________', 'blue') . '
+<?php namespace Netforum;
 
-'); } return parent::__doRequest($spae3035, $sp645ec4, $sp38d280, $spe7b96f); } public function auth() { $sp12efc5 = $this->request('Authenticate', array('parameters' => array('userName' => $this->_06f8fc86808e->_df91f08c163b, 'password' => $this->_06f8fc86808e->_308e29d1cc98))); if (is_object($sp12efc5)) { $this->_d1adf5959a77 = $sp12efc5->_a60eef134f47; } return $this; } public function authSso($sp1655c1 = null, $spfc0fc8 = null) { if (is_null($sp1655c1) && is_null($spfc0fc8) && !$this->_06f8fc86808e->_5ce046ca8a62) { throw new \Exception('Client credentials are required.'); } if (is_null($sp1655c1) && is_null($spfc0fc8) && $this->_06f8fc86808e->_5ce046ca8a62) { $sp1655c1 = $this->_06f8fc86808e->_5ce046ca8a62['username']; $spfc0fc8 = $this->_06f8fc86808e->_5ce046ca8a62['password']; } $sp12efc5 = $this->auth()->request('GetSignOnToken', array('parameters' => array('Email' => $sp1655c1, 'Password' => $spfc0fc8, 'Minutes' => $this->_06f8fc86808e->_e5d836550fbd))); if (is_object($sp12efc5) && isset($sp12efc5->_5c5d01bcd5a5)) { $this->_b87f4446ef83 = array_pop(explode('=', $sp12efc5->_5c5d01bcd5a5)); } return $this; } public function authCST() { $sp12efc5 = $this->auth()->request('GetCstKeyFromSignOnToken', array('parameters' => array('szEncryptedSingOnToken' => $this->_b87f4446ef83))); if (is_object($sp12efc5)) { $this->_63c893b63ee7 = $sp12efc5->_2c95e0a281fa; } return $this; } public function getToken() { return $this->_d1adf5959a77; } public function getSsoToken() { if (is_null($this->_b87f4446ef83)) { $this->authSso(); } return $this->_b87f4446ef83; } public function getCstToken() { if (is_null($this->_63c893b63ee7)) { $this->authSso(); $this->authCST(); } return $this->_63c893b63ee7; } public function getCustomerByKey($spf1c943 = null) { return $this->OD()->request('GetCustomerByKey', array('parameters' => array('szCstKey' => is_null($spf1c943) ? $this->getCstToken() : $spf1c943))); } public function request($spb6d647, array $sp0cb472 = array(), $sp6512b4 = null) { try { if ($this->_06f8fc86808e->_d4f1d7eed761) { dd(colorize('Command is ' . $spb6d647, 'yellow')); } if (!isset($sp0cb472['parameters']['AuthToken']) && isset($this->_d1adf5959a77)) { $sp0cb472['parameters']['AuthToken'] = $this->_d1adf5959a77; $sp6512b4 = new \SoapHeader('http://www.avectra.com/OnDemand/2005/', 'AuthorizationToken', array('Token' => $this->_d1adf5959a77)); if ($this->_06f8fc86808e->_d4f1d7eed761) { dd('SENDING HEADERS: '); dd($sp6512b4); } } $sp12917a = $this->__soapCall($spb6d647, $sp0cb472, null, $sp6512b4); if ($this->_06f8fc86808e->_d4f1d7eed761) { dd(colorize(" <<< {$spb6d647} Response Received _______", 'green') . '
+use Netforum\Traits\SingletonTrait;
+use Netforum\Exceptions\RuntimeException;
 
-'); dd($this->spd219a5($spb6d647, $sp12917a)); dd(colorize('________________', 'green') . '
+class Request extends \SoapClient
+{
+    use SingletonTrait;
 
-'); } return $this->spd219a5($spb6d647, $sp12917a); } catch (\SoapFault $spd62c57) { $spd339db = $spd62c57->getMessage(); if (preg_match('/failed to load external entity/i', $spd339db)) { $spd339db = 'request failed, netForum did not respond to our request, try again.'; } throw new RuntimeException($spd339db, $spd62c57->getCode(), $spd62c57); } } private function spd219a5($spb6d647, $sp12efc5) { $speb04d8 = $spb6d647 . 'Result'; if (!isset($sp12efc5->{$speb04d8}->_cb50e775e88e)) { return $sp12efc5; } libxml_use_internal_errors(true); $sp12efc5 = simplexml_load_string($sp12efc5->{$speb04d8}->_cb50e775e88e); $sp12efc5 = is_object($sp12efc5) && isset($sp12efc5->_70e82622864b) ? $sp12efc5->_70e82622864b : $sp12efc5; return sizeof($sp12efc5) ? $sp12efc5 : array(); } protected function OD() { $this->auth(); if (!isset($this->_c44ebac04c11)) { $spb22f69 = $this->getWsdlPage('netforumxmlondemand.wsdl'); $this->_c44ebac04c11 = new static($spb22f69, $this->_ba9835bd162f); } $this->_c44ebac04c11->_d1adf5959a77 = $this->_d1adf5959a77; $this->_c44ebac04c11->_b87f4446ef83 = $this->_b87f4446ef83; $this->_c44ebac04c11->_63c893b63ee7 = $this->_63c893b63ee7; return $this->_c44ebac04c11; } protected function getWsdlPage($sp08a7c3, $sp1c7ae0 = null) { if (is_null($sp1c7ae0)) { $sp1c7ae0 = $this->_bb5ac75b43dc; } $sp6dda25 = parse_url($sp1c7ae0); $sp6dda25['path'] = dirname($sp6dda25['path']) . '/' . $sp08a7c3; return http_build_url($sp1c7ae0, $sp6dda25); } }
+    protected $config;
+    protected $token;
+    protected $ssoToken;
+    protected $cstToken;
+
+    public function __construct($wsdl, array $params)
+    {
+        $this->config = (object) $params;
+        $this->wsdl = $wsdl;
+        $this->wsdl_params = $this->constructParams($params);
+
+        parent::__construct($wsdl, $this->wsdl_params);
+        return $this;
+    }
+
+    public function getTimeout()
+    {
+        return (int) $this->config->timeout;
+    }
+
+    public function setTimeout(int $t)
+    {
+        $this->config->timeout = $t;
+    }
+
+    public function getSoapVersion()
+    {
+        return SOAP_1_2;
+    }
+
+    protected function constructParams(array $p)
+    {
+        if ( $this->config->debug ) {
+            $p += ['trace' => true];
+        }
+
+        $p += [
+            'exceptions'             => true,
+            'soap_version'           => $this->getSoapVersion(),
+            'connection_timeout'     => $this->getTimeout(),
+            'default_socket_timeout' => $this->getTimeout(),
+            'cache_wsdl'             => WSDL_CACHE_BOTH,
+            'features'               => SOAP_SINGLE_ELEMENT_ARRAYS,
+            'encoding'               => 'UTF-8',
+            'user_agent'             => 'NetForum Api (Simple) by FusionSpan llc.',
+        ];
+
+        return array_filter($p);
+    }
+
+    public function __doRequest($request, $location, $action, $version, $one_way = 0)
+    {
+        ini_set('default_socket_timeout', $this->getTimeout());
+
+        if ( $this->config->debug ) {
+            dd(colorize(" >>> Sending Request _______", 'blue'));
+            dd(colorize("Params: \nRequest: " . prettyXML($request) . "\nLocation: $location\nAction: $action\nVersion: $version", 'blue'));
+            dd(colorize("________________", 'blue') . "\n\n");
+        }
+
+        return parent::__doRequest($request, $location, $action, $version);
+    }
+
+    /*public function __soapCall($cmd, array $params = [], array $options = null, \SoapHeader $headers = null)
+    {
+        return parent::__soapCall($cmd, $params, $options, $headers, $output_headers);
+    }*/
+
+    public function auth()
+    {
+        $response = $this->request('Authenticate', [
+                'parameters' => [
+                    'userName' => $this->config->username,
+                    'password' => $this->config->password
+                ]]
+        );
+
+        if ( is_object($response) ) {
+            $this->token = $response->AuthenticateResult;
+        }
+
+        return $this;
+    }
+
+    public function authSso($user = null, $pass = null)
+    {
+        if ( is_null($user) && is_null($pass) && !$this->config->credentials ) {
+            throw new \Exception('Client credentials are required.');
+        }
+
+        if ( is_null($user) && is_null($pass) && $this->config->credentials ) {
+            $user = $this->config->credentials['username'];
+            $pass = $this->config->credentials['password'];
+        }
+
+        $response = $this->auth()->request('GetSignOnToken', [
+                'parameters' => [
+                    'Email'    => $user,
+                    'Password' => $pass,
+                    'Minutes'  => $this->config->ttl,
+                ]]
+        );
+
+        if ( is_object($response) && isset($response->GetSignOnTokenResult) ) {
+            $this->ssoToken = array_pop(explode('=', $response->GetSignOnTokenResult));
+        }
+
+        return $this;
+    }
+
+    public function authCST()
+    {
+
+        $response = $this->auth()->request('GetCstKeyFromSignOnToken', [
+                'parameters' => [
+                    'szEncryptedSingOnToken' => $this->ssoToken,
+                ]]
+        );
+
+        if ( is_object($response) ) {
+            $this->cstToken = $response->GetCstKeyFromSignOnTokenResult;
+        }
+
+        return $this;
+    }
+
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    public function getSsoToken()
+    {
+        if ( is_null($this->ssoToken) ) {
+            $this->authSso();
+        }
+
+        return $this->ssoToken;
+    }
+
+    public function getCstToken()
+    {
+        if ( is_null($this->cstToken) ) {
+            $this->authSso();
+            $this->authCST();
+        }
+
+        return $this->cstToken;
+    }
+
+    public function getCustomerByKey($key = null)
+    {
+        //$this->getCstToken();
+        return $this->OD()->request('GetCustomerByKey', [
+                'parameters' => [
+                    'szCstKey' => is_null($key)
+                        ? $this->getCstToken()
+                        : $key,
+                ]]
+        );
+    }
+
+    public function request($cmd, array $params = [], $headers = null)
+    {
+        try {
+
+            if ( $this->config->debug ) {
+                dd(colorize('Command is ' . $cmd, 'yellow'));
+            }
+
+            // embed token automatically if exists.
+            if ( !isset($params['parameters']['AuthToken']) && isset($this->token) ) {
+                $params['parameters']['AuthToken'] = $this->token;
+
+                // set token headers.
+                $headers = new \SoapHeader(
+                    'http://www.avectra.com/OnDemand/2005/',
+                    'AuthorizationToken', [
+                    'Token' => $this->token,
+                ]);
+
+                if ( $this->config->debug ) {
+                    dd('SENDING HEADERS: ');
+                    dd($headers);
+                }
+            }
+
+            // make an internal soap call.
+            $resp = $this->__soapCall($cmd, $params, null, $headers);
+
+            // debugging
+            if ( $this->config->debug ) {
+                dd(colorize(" <<< $cmd Response Received _______", 'green') . "\n\n");
+                dd($this->toPrettyXML($cmd, $resp));
+                dd(colorize("________________", 'green') . "\n\n");
+            }
+
+            return $this->toPrettyXML($cmd, $resp);
+        }
+        catch (\SoapFault $e) {
+            $msg = $e->getMessage();
+            if ( preg_match('/failed to load external entity/i', $msg) ) {
+                $msg = 'request failed, netForum did not respond to our request, try again.';
+            }
+            throw new RuntimeException($msg, $e->getCode(), $e);
+        }
+    }
+
+    private function toPrettyXML($cmd, $response)
+    {
+        $result = $cmd . 'Result';
+        if ( !isset($response->$result->any) ) {
+            return $response;
+        }
+
+        libxml_use_internal_errors(true);
+        $response = simplexml_load_string($response->$result->any);
+
+        // get only result object from response
+        $response = (is_object($response) && isset($response->Result))
+            ? $response->Result
+            : $response;
+
+        return sizeof($response)
+            ? $response
+            : [];
+    }
+
+    protected function OD()
+    {
+        $this->auth();
+
+        if ( !isset($this->od) ) {
+            $wsdl = $this->getWsdlPage('netforumxmlondemand.wsdl');
+            $this->od = new static($wsdl, $this->wsdl_params);
+        }
+
+        $this->od->token = $this->token;
+        $this->od->ssoToken = $this->ssoToken;
+        $this->od->cstToken = $this->cstToken;
+
+        return $this->od;
+    }
+
+    protected function getWsdlPage($page, $url = null)
+    {
+        if ( is_null($url) ) {
+            $url = $this->wsdl;
+        }
+
+        $parts = parse_url($url);
+        $parts['path'] = dirname($parts['path']) . '/' . $page;
+        return http_build_url($url, $parts);
+    }
+}
