@@ -1,0 +1,38 @@
+{
+    "name": "fsahsen/wp-netauth",
+    "description": "",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ahsen M.",
+            "homepage": "https://github.com/kodeine",
+            "role": "Developer"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "/home/guru/Desktop/Projects/nf"
+        },
+        {
+            "type": "vcs",
+            "url": "/home/guru/Desktop/Projects/WP/plugins/wp-bootstrap"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "composer/installers" : "~1.0",
+        "fusionspan/netforum": "dev-master",
+        "fsahsen/wp-bootstrap": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "NetAuth\\": ""
+        }
+    },
+    "type": "wordpress-plugin",
+    "extra" : {
+        "installer-name" : "netauth"
+    },
+    "minimum-stability": "dev"
+}
