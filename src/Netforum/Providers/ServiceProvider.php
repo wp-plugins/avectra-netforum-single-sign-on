@@ -1,2 +1,0 @@
-<?php
-namespace Netforum\Providers; use Netforum\Request; class ServiceProvider { public function __construct(array $sp680ecc) { $spb22f69 = $sp680ecc['wsdl']; $this->_1109c920e452 = new Request($spb22f69, $sp680ecc); } }
