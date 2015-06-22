@@ -1,2 +1,6 @@
-<?php
-namespace Netforum\Exceptions; class RuntimeException extends \Exception { }
+<?php namespace Netforum\Exceptions;
+
+class RuntimeException extends \Exception
+{
+
+}

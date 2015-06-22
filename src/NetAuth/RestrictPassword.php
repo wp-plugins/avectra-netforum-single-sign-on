@@ -1,2 +1,41 @@
-<?php
-namespace NetAuth; class RestrictPassword { public function __construct() { add_filter('show_password_fields', array($this, 'disable')); add_filter('allow_password_reset', array($this, 'disable')); add_filter('gettext', array($this, 'remove')); } public function disable() { if (is_admin()) { $sp8cd746 = wp_get_current_user(); $sp1655c1 = new \WP_User($sp8cd746->_7261e96daf02); return !empty($sp1655c1->_400c202f9850) && is_array($sp1655c1->_400c202f9850) && array_shift($sp1655c1->_400c202f9850) == 'administrator'; } return false; } public function remove($spd62c57) { return preg_replace('/lost your password\\??/is', '', $spd62c57); } }
+<?php namespace NetAuth;
+
+class RestrictPassword
+{
+    /**
+     *
+     */
+    public function __construct()
+    {
+        add_filter('show_password_fields', [$this, 'disable']);
+        add_filter('allow_password_reset', [$this, 'disable']);
+        add_filter('gettext', [$this, 'remove']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function disable()
+    {
+        if ( is_admin() ) {
+            $data = wp_get_current_user();
+            $user = new \WP_User($data->ID);
+
+            return !empty($user->roles)
+            && is_array($user->roles)
+            && array_shift($user->roles) == 'administrator';
+        }
+        return false;
+    }
+
+    /**
+     * @param $e
+     * @return mixed
+     */
+    public function remove($e)
+    {
+        return preg_replace('/lost your password\??/is', '', $e);
+    }
+}
+
+?>

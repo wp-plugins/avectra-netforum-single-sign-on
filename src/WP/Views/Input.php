@@ -1,4 +1,251 @@
-<?php
-namespace WP\Views; class Input { public static function textfield($spc0cb4a) { return self::field($spc0cb4a, $sp2fda43 = 'text'); } public static function passwordfield($spc0cb4a) { return self::field($spc0cb4a, $sp2fda43 = 'password'); } public static function checkbox($spc0cb4a) { return self::field($spc0cb4a, $sp2fda43 = 'checkbox', null); } public static function textarea($spc0cb4a) { return self::field($spc0cb4a, $sp2fda43 = 'textarea', null); } protected static function field($spc0cb4a, $sp2fda43 = 'text', $sp8fd6fe = 'regular-text') { $sp139d9c = $spc0cb4a['id']; $spe74fd1 = $spc0cb4a['group']; $sp735857 = $spc0cb4a['section']; $sp7bfdd4 = "{$spe74fd1}[{$sp735857}][{$sp139d9c}]"; $spb7903b = self::makeDefaultValue($spc0cb4a); $sp43f4de = ''; if ($sp2fda43 == 'checkbox') { $sp43f4de .= checked(1, (bool) $spb7903b, false); if (!checked(1, (bool) $spb7903b, false)) { $spb7903b = checked(1, $spb7903b, false) ? 0 : 1; } } if (!is_null($spc0cb4a['js'])) { self::addJS($spc0cb4a['js'], $sp7bfdd4, $spb7903b, $spc0cb4a); } $sp0cb472 = array('class' => $sp8fd6fe, 'type' => $sp2fda43, 'name' => $sp7bfdd4, 'value' => esc_attr($spb7903b), 'extra' => $sp43f4de); switch ($sp2fda43) { case 'textarea': self::itemTextArea($sp0cb472); break; default: self::itemTextField($sp0cb472); } self::addDescription($spc0cb4a['desc']); } private static function itemTextArea(array $sp0cb472) { printf('<textarea cols=30 rows=4 class=\'%s\' type=\'%s\' name=\'%s\' %s>%s</textarea>', $sp0cb472['class'], $sp0cb472['type'], $sp0cb472['name'], $sp0cb472['extra'], $sp0cb472['value']); } private static function itemTextField(array $sp0cb472) { printf('<input class=\'%s\' type=\'%s\' name=\'%s\' value=\'%s\' %s />', $sp0cb472['class'], $sp0cb472['type'], $sp0cb472['name'], $sp0cb472['value'], $sp0cb472['extra']); } private static function addDescription($sp560f2a) { if (is_array($sp560f2a)) { printf('<small>&nbsp; %s</small><br><small>%s</small>', array_shift($sp560f2a), esc_attr(array_pop($sp560f2a))); } else { printf('<br><small>%s</small>', esc_attr($sp560f2a)); } } private static function makeDefaultValue(array $spc0cb4a) { $spc73875 = $spc0cb4a['default']; $spbde53a = $spc0cb4a['filter']; $sp43d122 = self::getOptionValue($spc0cb4a); if (is_null($sp43d122) && is_array($spc73875)) { $spc73875 = self::handleCallback($spc73875); } if (is_array($spbde53a)) { $sp43d122 = self::handleCallback($spbde53a, array(is_null($sp43d122) ? $spc73875 : $sp43d122)); } return is_null($sp43d122) ? $spc73875 : $sp43d122; } public static function handleCallback($spbf2dd2, array $sp43d122 = array()) { if (!is_array($spbf2dd2)) { return $sp43d122; } $sp9f5867 = array_shift($spbf2dd2); $sp0cb472 = is_array(end($spbf2dd2)) ? is_null($sp43d122) ? end($spbf2dd2) : array_merge(end($spbf2dd2), $sp43d122) : $sp43d122; return call_user_func_array($sp9f5867, $sp0cb472); } private static function getOptionValue(array $spc0cb4a) { $sp139d9c = $spc0cb4a['id']; $spe74fd1 = $spc0cb4a['group']; $sp735857 = $spc0cb4a['section']; if (isset($_REQUEST[$spe74fd1][$sp735857][$sp139d9c])) { return $_REQUEST[$spe74fd1][$sp735857][$sp139d9c]; } $spa8853d = get_option($spe74fd1); return isset($spa8853d[$sp139d9c]) && !empty($spa8853d[$sp139d9c]) ? $spa8853d[$sp139d9c] : isset($spa8853d[$sp735857][$sp139d9c]) && !empty($spa8853d[$sp735857][$sp139d9c]) ? $spa8853d[$sp735857][$sp139d9c] : null; } public static function addJS($spf853b0, $spf1c943 = '', $spb7903b = '', $spc0cb4a = '') { $spe74fd1 = $sp735857 = null; is_array($spc0cb4a) ? extract($spc0cb4a) : null; $sp00a7dc = function ($spf1c943, $sp69dc84 = '') { return sprintf('$(\'input[name%s="%s"]\')', $sp69dc84, $spf1c943); }; printf('<script>jQuery(document).ready(function($) { %s });</script>', preg_replace(array('/%field:(.*?)%/i', '/%field/', '/%value/'), array($sp00a7dc('[$1]', '*'), $sp00a7dc($spf1c943), esc_attr($spb7903b)), self::compress($spf853b0))); } protected static function compress($spa4cfff) { $spa4cfff = preg_replace('/((?:\\/\\*(?:[^*]|(?:\\*+[^*\\/]))*\\*+\\/)|(?:\\/\\/.*))/', '', $spa4cfff); $spa4cfff = str_replace(array('
-', '', '	', '
-', '  ', '    ', '     '), '', $spa4cfff); $spa4cfff = preg_replace(array('(( )+\\))', '(\\)( )+)'), ')', $spa4cfff); return $spa4cfff; } }
+<?php namespace WP\Views;
+
+class Input
+{
+    /**
+     * @param $args
+     */
+    static public function textfield($args)
+    {
+        return self::field($args, $type = 'text');
+    }
+
+    /**
+     * @param $args
+     */
+    static public function passwordfield($args)
+    {
+        return self::field($args, $type = 'password');
+    }
+
+    /**
+     * @param $args
+     */
+    static public function checkbox($args)
+    {
+        return self::field($args, $type = 'checkbox', null);
+    }
+
+    /**
+     * @param $args
+     */
+    static public function textarea($args)
+    {
+        return self::field($args, $type = 'textarea', null);
+    }
+
+    /**
+     * @param        $args
+     * @param string $type
+     * @param string $class
+     */
+    static protected function field($args, $type = 'text', $class = 'regular-text')
+    {
+        $id = $args['id'];
+        $group = $args['group'];
+        $section = $args['section'];
+
+        // set field name based on section.
+        $fieldName = "{$group}[$section][$id]";
+
+        // make default value.
+        $value = self::makeDefaultValue($args);
+
+        // add checkbox checked value
+        $extra = '';
+        if ( $type == 'checkbox' ) {
+            $extra .= checked(1, (bool) $value, false);
+            if ( !checked(1, (bool) $value, false) ) {
+                $value = checked(1, $value, false) ? 0 : 1;
+            }
+        }
+
+        // embed JS =)
+        if ( !is_null($args['js']) ) {
+            self::addJS($args['js'], $fieldName, $value, $args);
+        }
+
+        // params
+        $params = [
+            'class' => $class,
+            'type'  => $type,
+            'name'  => $fieldName,
+            'value' => esc_attr($value),
+            'extra' => $extra,
+        ];
+
+        // print field
+        switch ($type) {
+            case 'textarea':
+                self::itemTextArea($params);
+                break;
+            default:
+                self::itemTextField($params);
+        }
+
+        // add description for input field.
+        self::addDescription($args['desc']);
+    }
+
+    /**
+     * @param array $params
+     */
+    static private function itemTextArea(array $params)
+    {
+        printf("<textarea cols=30 rows=4 class='%s' type='%s' name='%s' %s>%s</textarea>",
+            $params['class'],
+            $params['type'],
+            $params['name'],
+            $params['extra'],
+            $params['value']
+        );
+    }
+
+    /**
+     * @param array $params
+     */
+    static private function itemTextField(array $params)
+    {
+        printf("<input class='%s' type='%s' name='%s' value='%s' %s />",
+            $params['class'],
+            $params['type'],
+            $params['name'],
+            $params['value'],
+            $params['extra']
+        );
+    }
+
+    /**
+     * @param $desc
+     */
+    static private function addDescription($desc)
+    {
+        if ( is_array($desc) ) {
+            printf('<small>&nbsp; %s</small><br><small>%s</small>',
+                array_shift($desc),
+                esc_attr(array_pop($desc))
+            );
+        } else {
+            printf("<br><small>%s</small>", esc_attr($desc));
+        }
+    }
+
+    /**
+     * @param array $args
+     * @return array|mixed|null
+     */
+    static private function makeDefaultValue(array $args)
+    {
+        $default = $args['default'];
+        $filter = $args['filter'];
+
+        // get value from option.
+        $return = self::getOptionValue($args);
+
+        // set default value.
+        // if its an array use callback function.
+        if ( is_null($return) && is_array($default) ) {
+            $default = self::handleCallback($default);
+        }
+
+        // filter value based on filter callback.
+        if ( is_array($filter) ) {
+            $return = self::handleCallback($filter, [
+                is_null($return)
+                    ? $default
+                    : $return
+            ]);
+        }
+
+        return is_null($return)
+            ? $default
+            : $return;
+    }
+
+    /**
+     * @param       $callback
+     * @param array $return
+     * @return array|mixed
+     */
+    static public function handleCallback($callback, array $return = [])
+    {
+        if ( !is_array($callback) )
+            return $return;
+
+        $call = array_shift($callback);
+        $params = is_array(end($callback))
+            ? is_null($return)
+                ? end($callback)
+                : array_merge(end($callback), $return)
+            : $return;
+
+        return call_user_func_array(
+            $call, $params
+        );
+    }
+
+    /**
+     * @param array $args
+     * @return null
+     */
+    static private function getOptionValue(array $args)
+    {
+        $id = $args['id'];
+        $group = $args['group'];
+        $section = $args['section'];
+
+        // if on post, display last value ;)
+        if ( isset($_REQUEST[$group][$section][$id]) ) {
+            return $_REQUEST[$group][$section][$id];
+        }
+
+        // set predefined value
+        $opt = get_option($group);
+        return isset($opt[$id]) && !empty($opt[$id])
+            ? $opt[$id]
+            : isset($opt[$section][$id]) && !empty($opt[$section][$id])
+                ? $opt[$section][$id]
+                : null;
+    }
+
+    /**
+     * @param        $js
+     * @param string $key
+     * @param string $value
+     * @param string $args
+     */
+    static public function addJS($js, $key = '', $value = '', $args = '')
+    {
+        $group = $section = null;
+        is_array($args) ? extract($args) : null;
+
+        $getInput = function ($key, $delim = '') {
+            return sprintf("$('input[name%s=\"%s\"]')", $delim, $key);
+        };
+
+        printf("<script>jQuery(document).ready(function($) { %s });</script>",
+            preg_replace(
+                ['/%field:(.*?)%/i', '/%field/', '/%value/'], [
+                $getInput('[$1]', '*'),
+                $getInput($key),
+                esc_attr($value),
+            ], self::compress($js))
+        );
+    }
+
+    /**
+     * @param $buffer
+     * @return mixed
+     */
+    static protected function compress($buffer)
+    {
+        // remove comments
+        $buffer = preg_replace("/((?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/", "", $buffer);
+        // remove tabs, spaces, newlines, etc.
+        $buffer = str_replace(["\r\n", "\r", "\t", "\n", '  ', '    ', '     '], '', $buffer);
+        // remove other spaces before/after )
+        $buffer = preg_replace(['(( )+\))', '(\)( )+)'], ')', $buffer);
+
+        return $buffer;
+    }
+}

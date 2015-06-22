@@ -1,2 +1,174 @@
-<?php
-namespace WP\Views; use Netforum\Traits\SingletonTrait; abstract class View extends Form { use SingletonTrait; protected $_691489147657; protected $_52c4ce77469c = array('abstract' => array('desc' => 'this is the abstract section.', 'fields' => array('field1' => array('title' => 'abstract field 1', 'desc' => 'you should extend this abstract class and not use it directly.', 'validate' => array('[a-zA-Z0-9_]{5,}', 'must be minimum 5 characters, format (a-z 0-9 _-)'), 'required' => true, 'callback' => null, 'default' => 'some value', 'filter' => 'trim')))); public function __construct() { $this->_ae3d9eac21dc = Page::getCurrentPage(); $this->_691489147657 = snake_case(end(explode('\\', get_called_class()))); if (isset($_POST[$this->_ae3d9eac21dc]) && sizeof($_POST[$this->_ae3d9eac21dc]) > 0) { !$this->validate() ? $this->flash(true) : $this->store() && $this->flash(); } $this->init(); $this->render(); } protected function init() { register_setting($this->_ae3d9eac21dc, $this->_691489147657, array($this, 'sanitize')); if (sizeof($this->_52c4ce77469c) <= 0) { return false; } array_walk($this->_52c4ce77469c, function ($spd62c57, $spf1c943) { $this->makeSection($spf1c943, $spd62c57['desc']); if (isset($spd62c57['js'])) { Input::handleCallback($spd62c57['js']); } array_walk($spd62c57['fields'], function ($sp12d00f, $spc8a416) use($spf1c943) { $sp12d00f += array('key' => $spc8a416, 'section' => $spf1c943); $this->makeField($spc8a416, $sp12d00f); }); }); } protected function render() { if (sizeof($this->_52c4ce77469c) > 0) { settings_fields($this->_691489147657); do_settings_sections($this->_ae3d9eac21dc); submit_button(); } } protected function makeSection($sp086745, $sp560f2a = null, $sp758fc1 = null) { if (is_null($sp758fc1)) { $sp758fc1 = function () use($sp560f2a) { print $sp560f2a; }; } return add_settings_section($this->toSlug($sp086745), ucwords($sp086745), $sp758fc1, $this->_ae3d9eac21dc); } protected function makeField($sp139d9c, array $spd62c57) { if (is_null($spd62c57['callback'])) { $spd62c57['callback'] = 'textfield'; } if (!is_array($spd62c57['callback'])) { $spd62c57['callback'] = array(__NAMESPACE__ . '\\Input', $spd62c57['callback']); } $sp735857 = $this->toSlug($spd62c57['section']); if (sizeof($spd62c57['args']) <= 0) { $spd62c57['args'] = array('group' => $this->_691489147657, 'section' => $sp735857, 'id' => $sp139d9c, 'desc' => $spd62c57['desc'], 'default' => $spd62c57['default'], 'filter' => $spd62c57['filter'], 'js' => $spd62c57['js']); } return add_settings_field($sp139d9c, $spd62c57['title'], $spd62c57['callback'], $this->_ae3d9eac21dc, $sp735857, $spd62c57['args']); } protected function toSlug($spd62c57, $spfb1b65 = '_') { return preg_replace('/[^\\w]/', $spfb1b65, strtolower($spd62c57)); } }
+<?php namespace WP\Views;
+
+use Netforum\Traits\SingletonTrait;
+
+/**
+ * Class View
+ *
+ * @package WP\Views
+ */
+abstract class View extends Form
+{
+    use SingletonTrait;
+
+    protected $group;
+    protected $fields = [
+        'abstract' => [
+            'desc'   => 'this is the abstract section.',
+            'fields' => [
+                'field1' => [
+                    'title'    => 'abstract field 1',
+                    'desc'     => 'you should extend this abstract class and not use it directly.',
+                    'validate' => ['[a-zA-Z0-9_]{5,}', 'must be minimum 5 characters, format (a-z 0-9 _-)'],
+                    'required' => true,
+                    'callback' => null,
+                    'default'  => 'some value',
+                    'filter'   => 'trim',
+                ],
+            ],
+        ],
+    ];
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        $this->page = Page::getCurrentPage();
+        $this->group = snake_case(end(explode('\\', get_called_class())));
+
+        /*dd('I am in class: ' . get_called_class());
+        dd('I am in page: ' . $this->page);
+        dd('I am in group: ' . $this->group);*/
+
+        if ( isset($_POST[$this->page]) && sizeof($_POST[$this->page]) > 0 ) {
+            !$this->validate()
+                ? $this->flash(true)
+                : ($this->store() && $this->flash());
+        }
+
+        $this->init();
+        $this->render();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function init()
+    {
+        register_setting(
+            $this->page, // option group
+            $this->group, // option name
+            [$this, 'sanitize']
+        );
+
+        if ( sizeof($this->fields) <= 0 ) {
+            return false;
+        }
+
+        array_walk($this->fields, function ($e, $key) {
+            $this->makeSection($key, $e['desc']);
+
+            // add on demand js for the section.
+            if ( isset($e['js']) ) {
+                Input::handleCallback($e['js']);
+            }
+
+            array_walk($e['fields'], function ($f, $k) use ($key) {
+                $f += ['key'     => $k,
+                       'section' => $key];
+                $this->makeField($k, $f);
+            });
+        });
+    }
+
+    /**
+     *
+     */
+    protected function render()
+    {
+        if ( sizeof($this->fields) > 0 ) {
+            settings_fields($this->group);
+            do_settings_sections($this->page);
+            submit_button();
+        }
+    }
+
+    /**
+     * @param      $title
+     * @param null $desc
+     * @param null $cb
+     * @return mixed
+     */
+    protected function makeSection($title, $desc = null, $cb = null)
+    {
+        /*dd('ADDING SECTION: ' . $title);
+        dd('TITLE: ' . $title);
+        dd('SECTION: ' . $this->toSlug($title));*/
+
+        if ( is_null($cb) ) {
+            $cb = function () use ($desc) {
+                print $desc;
+            };
+        }
+
+        return add_settings_section(
+            $this->toSlug($title),
+            ucwords($title), $cb,
+            $this->page
+        );
+    }
+
+    /**
+     * @param       $id
+     * @param array $e
+     * @return mixed
+     */
+    protected function makeField($id, array $e)
+    {
+        // set default callback as text field.
+        if ( is_null($e['callback']) ) {
+            $e['callback'] = 'textfield';
+        }
+
+        // set callback to specified callback.
+        if ( !is_array($e['callback']) ) {
+            $e['callback'] = [
+                __NAMESPACE__ . '\Input', $e['callback']
+            ];
+        }
+
+        // make section slug.
+        $section = $this->toSlug($e['section']);
+
+        // set default arguments.
+        if ( sizeof($e['args']) <= 0 ) {
+            $e['args'] = [
+                'group'   => $this->group,
+                'section' => $section,
+                'id'      => $id,
+                'desc'    => $e['desc'],
+                'default' => $e['default'],
+                'filter'  => $e['filter'],
+                'js'      => $e['js'],
+            ];
+        }
+
+        // generate the field.
+        return add_settings_field(
+            $id, $e['title'], $e['callback'],
+            $this->page, $section,
+            $e['args']
+        );
+    }
+
+    /**
+     * @param        $e
+     * @param string $delimeter
+     * @return mixed
+     */
+    protected function toSlug($e, $delimeter = '_')
+    {
+        return preg_replace('/[^\w]/', $delimeter, strtolower($e));
+    }
+}

@@ -1,2 +1,75 @@
-<?php
-namespace NetAuth; class RemoveAdminBar { private $_43b0c7265d31 = array('Dashboard'); public function __construct() { add_filter('after_setup_theme', array($this, 'removeAdminBar')); add_action('admin_menu', array($this, 'removeAdminMenuItems')); } private function spa93405() { return !current_user_can('manage_options'); } public function removeAdminBar() { if (!$this->spa93405()) { return false; } show_admin_bar(false); add_filter('show_admin_bar', '__return_false'); add_filter('wp_admin_bar_class', '__return_false'); } public function removeAdminMenuItems() { global $menu; if (!$this->spa93405()) { return false; } $sp5203f0 = array_filter($this->_43b0c7265d31, '__'); end($menu); while (prev($menu)) { $sp4dfe7c = explode(' ', $menu[key($menu)][0]); if (in_array($sp4dfe7c[0] != null ? $sp4dfe7c[0] : '', $sp5203f0)) { unset($menu[key($menu)]); } } if (preg_match('/src\\s*=\\s*(\'|")(.*?)("|\')/', get_avatar(get_current_user_id(), 20), $sp9fc1b5)) { $menu[] = array('Log Out', 'read', wp_logout_url(), 'Logout', 'menu-top', 'logout', $sp9fc1b5[2]); } } }
+<?php namespace NetAuth;
+
+class RemoveAdminBar
+{
+    /**
+     * @var array
+     */
+    private $menuItems = ['Dashboard'];
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        add_filter('after_setup_theme', [$this, 'removeAdminBar']);
+        add_action('admin_menu', [$this, 'removeAdminMenuItems']);
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasPermission()
+    {
+        return !current_user_can('manage_options');
+    }
+
+    /**
+     * @return bool
+     */
+    public function removeAdminBar()
+    {
+        // add filters only if its not admin.
+        if ( !$this->hasPermission() )
+            return false;
+
+        show_admin_bar(false);
+        add_filter('show_admin_bar', '__return_false');
+        add_filter('wp_admin_bar_class', '__return_false');
+    }
+
+    /**
+     * @return bool
+     */
+    public function removeAdminMenuItems()
+    {
+        global $menu;
+
+        // add filters only if its not admin.
+        if ( !$this->hasPermission() )
+            return false;
+
+        $remove = array_filter($this->menuItems, '__');
+        end($menu);
+        while (prev($menu)) {
+            $item = explode(' ', $menu[key($menu)][0]);
+            if ( in_array($item[0] != null
+                ? $item[0]
+                : "", $remove) ) {
+                unset($menu[key($menu)]);
+            }
+        }
+
+        // add logout button in front end.
+        if (preg_match("/src\s*=\s*('|\")(.*?)(\"|')/", get_avatar(get_current_user_id(), 20), $m)) {
+            $menu[] = [
+                'Log Out',
+                'read', wp_logout_url(),
+                'Logout',
+                'menu-top',
+                'logout',
+                $m[2]
+            ];
+        }
+    }
+}
