@@ -4,7 +4,7 @@
  * Plugin Name: fusionSpan | netFORUM Single Sign On
  * Plugin URI: http://fusionspan.com/
  * Description: Authenticate users to sign in using Avectra netFORUM credentials via xWeb.
- * Version: 0.5-alpha
+ * Version: 1.1-alpha
  * Author: fusionSpan LLC.
  * Author URI: http://fusionspan.com/
  * License: GPLv3
