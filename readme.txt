@@ -1,63 +1,71 @@
-=== netForum SSO  ===
-Contributors: fusionspan
+=== netFORUM Single Sign On  ===
+Contributors: fsahsen
 Donate link: http://fusiopnspan.com/
-Tags: avectra, netforum, sso
+Tags: avectra, netforum, sso, single sign on
 Requires at least: 3.0.1
-Tested up to: 3.9
-Stable tag: trunk
+Tested up to: 4.2
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-netForum Pro Single Sign on. Allows users to sign in to wordpress using Avectra netForum Pro credentials.
+netFORUM Single Sign on. Allows users to sign in to wordpress using Avectra netFORUM credentials.
 
 
 == Description ==
-Contributed by fusionSpan (www.fusionspan.com). This plug-in allows for Single Sign on between netForum and Wordpress. Users can sign in to Wordpress using their netForum credentials.
+This plug-in allows for Single Sign On between netFORUM and Wordpress. Users can sign in to Wordpress using their netFORUM credentials.
 
 We have additional plug-ins available that compliment this SSO plug-in. Listed below
 
-* Security Groups - Allows you to restrict content on your Wordpress CMS site, based on the users Membership status in netForum.
+* Security Groups - Allows you to restrict content on your Wordpress CMS site, based on the users Membership status in netFORUM.
 
-* SSO with Bi-directional sync - In addition to basic SSO, this plug-in allows you to manage (create/update) users in Wordpress, and this information is automatically synched back to netForum. Wordpress users can edit their profile and their information is automatically updated in netForum. Adds additional fields to the Wordpress user profile and allows for field mapping between Wordpress and netForum. Contact support@fusionspan.com if you would like a demo.
+* SSO with Bi-directional sync - In addition to basic SSO, this plug-in allows you to manage (create/update) users in Wordpress, and this information is automatically synched back to netFORUM. Wordpress users can edit their profile and their information is automatically updated in netFORUM. Adds additional fields to the Wordpress user profile and allows for field mapping between Wordpress and netFORUM. Contact support@fusionspan.com if you would like a demo.
+
+* To know about our newest plugins, feel free to visit the link below.
+
+* Contributed by [fusionSpan](http://fusionspan.com/netforum-plug-ins/ "netFORUM plugins by fusionSpan.com").
 
 == Installation ==
 
-netforum Pro SSO plugin uses the netForum xWeb web services to authenticate users. This allows
-for Single Sign on Capabilities, where users can sign in to Wordpress using their netforum
+netFORUM Pro SSO plugin uses the netFORUM xWeb web services to authenticate users. This allows
+for Single Sign on Capabilities, where users can sign in to Wordpress using their netFORUM
 credentials (username and password).
 
 For this plug-in to work, you need to have a xWeb service available. xWeb is available to all
-netforum Team and Pro subscriptions.
+netFORUM Team and Pro subscriptions.
 
 e.g.
 
-1. Unzip the `netforum_sso.zip` in to the `/wp-content/plugins/` directory
+1. Unzip the `netFORUM_sso.zip` in to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go into the Wordpress Dashboard  and configure the plugin by going into
-   Settings -> netForum SSO
+   admin page and clicking the sidebar menu item fusionSpan.
    The following options need to be configured
 
-   xWeb Single SignOn WSDL URL - is the URL for the netForum xWeb SSO web service
-   xWeb Admin Username - The username for the xWeb service
-   xWeb Admin Username - The password for the xWeb service
+   xWeb Single SignOn WSDL URL - is the URL for the netFORUM xWeb SSO web service
+   xWeb Username - The username for the xWeb service
+   xWeb Password - The password for the xWeb service
    
 
 == Frequently Asked Questions ==
 
 = How does this plugin authenticate users? =
 
-The netforum SSO plugin uses the netForum xWeb web service API, to authenticate users.
+The netFORUM SSO plugin uses the netFORUM xWeb web service API, to authenticate users.
 
 = Does it create new users in Wordpress? =
 It will create users in Wordpress if they don't exist, on the users first login. It does
 not save the users password in Wordpress. So the user will always need to sign in with
-their netForum credentials. Users need to navigate to netForum to change/update their passwords.
+their netFORUM credentials. Users need to navigate to netFORUM to change/update their passwords.
 
-= How can I create hyperlinks to netForum so that the wordpress user doesn't have to login again? =
+= I am getting a "Client credentials are required" error message. How do I fix this? =
+Usually this error is created when the netFORUM login credentials set in plugin page, under the General tab is incorrect.
+To fix this double check the credentials you entered in the plugin page.
 
-The netforum_sso plugin saves the users xWeb single sign on token as a session variable in Wordpress.
-You need to append this SSO Token to the hyperlinks to netForum. This way the users can navigate over to
-netForum and not have to login again.  The SSO token is saved as the user_netforum_sso
+= How can I create hyperlinks to netFORUM so that the wordpress user doesn't have to login again? =
+
+The netFORUM_sso plugin saves the users xWeb single sign on token as a session variable in Wordpress.
+You need to append this SSO Token to the hyperlinks to netFORUM. This way the users can navigate over to
+netFORUM and not have to login again.  The SSO token is saved as the user_netforum_sso
 PHP session variable in Wordpress.
 
 To use it in a page or post, you will need to install another plug-in (there are several), that will allow
@@ -72,35 +80,27 @@ if(is_user_logged_in()){
 [/insert_php]`
 
 
+
 * The above example uses the “Insert PHP WordPress Plugin”. 
 
 
-= Does it work with netForum Enterprise? =
-It most likely does, but we have not tested it with netForum enterprise. Since the
-netForum xWeb services are the same when it comes to authentication, so this plug-in should work. If not, send us
-an email and we can help you tweak it to work with your netForum enterprise installation.
+= Does it work with netFORUM Enterprise? =
+It most likely does, but we have not tested it with netFORUM enterprise. Since the
+netFORUM xWeb services are the same when it comes to authentication, so this plug-in should work. If not, send us
+an email and we can help you tweak it to work with your netFORUM enterprise installation.
 
 
 == Screenshots ==
 
 1. Plugin Settings. Enter your xWeb credentials here (received from Avectra)
 
+2. Plugin Cache Settings. The cache holds previous request to netFORUM and their results.
+
 
 == Changelog ==
 
-= 1.0 =
-* First release.
+= 0.5-dev =
+* Fixes some bugs.
 
-= 1.1 =
-* Upgraded to Wordpress 3.9
-* New session variable $_SESSION['user_netforum_sso'] stores the netForum SSO Token
-
-
-== Upgrade Notice ==
-
-= 1.0 =
-First release
-
-= 1.1 =
-* Upgraded to Wordpress 3.9
-
+= 0.4-dev =
+* Rewrite complete package.
