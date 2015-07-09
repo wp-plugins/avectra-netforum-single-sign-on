@@ -1,2 +1,13 @@
-<?php
-namespace Netforum\Providers; use Netforum\Request; class ServiceProvider { public function __construct(array $config) { $spe5a964 = $config['wsdl']; $this->simple = new Request($spe5a964, $config); } }
+<?php namespace Netforum\Providers;
+
+use \Netforum\Request;
+
+class ServiceProvider
+{
+    public function __construct(array $config)
+    {
+        // mimic the full version of netforum package.
+        $wsdl = $config['wsdl'];
+        $this->simple = new Request($wsdl, $config);
+    }
+}

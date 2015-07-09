@@ -1,2 +1,198 @@
-<?php
-namespace NetAuth; class Authenticate { private $ssoToken; public function __construct() { add_filter('authenticate', array($this, 'validate'), 10, 3); } public function validate($spffcd2d, $sp738ed2, $sp379388) { if (empty($sp738ed2) || empty($sp379388)) { return false; } try { $spffcd2d = get_user_by('login', $sp738ed2); $sp566d2e = get_user_meta($spffcd2d->ID, 'netforum', true); if (is_object($spffcd2d) && empty($sp566d2e)) { return false; } $sp6826cb = $this->authenticate($sp738ed2, $sp379388); $sp77ccc0 = array('user_email' => strtolower($sp6826cb->EmailAddress), 'user_login' => strtolower($sp6826cb->EmailAddress), 'first_name' => ucwords($sp6826cb->ind_first_name), 'last_name' => ucwords($sp6826cb->ind_last_name), 'nickname' => ucwords($sp6826cb->ind_first_name) . ' ' . ucwords($sp6826cb->ind_last_name), ''); if (!is_object($spffcd2d)) { if ($spe8397b = $this->sp95e50c($sp6826cb->cst_id, $spffcd2d->ID)) { global $wpdb; $wpdb->update($wpdb->users, array_slice($sp77ccc0, 0, 2), array('ID' => $spe8397b)); $spffcd2d = new \WP_User(wp_update_user(array('ID' => $spe8397b) + $sp77ccc0)); } else { $spffcd2d = new \WP_User(wp_insert_user($sp77ccc0)); } } else { wp_update_user($sp77ccc0 + array('ID' => $spffcd2d->ID)); } $this->setSession($sp6826cb, $spffcd2d); do_action('nf_SyncGroups'); } catch (\Exception $sp55070e) { remove_action('authenticate', 'wp_authenticate_username_password', 20); $spffcd2d = new \WP_Error('denied', __('Uh Oh!<br> ' . $sp55070e->getMessage())); } return $spffcd2d; } protected function setSession($sp6826cb, $spffcd2d) { $sp14344b = array('cst_id' => (int) $sp6826cb->cst_id, 'cst_key' => (string) $sp6826cb->cst_key, 'sso_token' => $this->ssoToken); update_user_meta($spffcd2d->ID, 'netforum', $sp14344b); if (!session_id()) { session_start(); } $_SESSION += array('netforum' => $sp6826cb); } protected function authenticate($sp738ed2, $sp379388) { $sp515b8d = get_option('netforum'); if (!is_array($sp515b8d) || empty($sp515b8d['single_sign_on']['wsdl'])) { throw new \Exception('Something went wrong, netforum xweb credentials not set.'); } $sp172646 = array('debug' => false, 'ttl' => 12, 'timeout' => $sp515b8d['connection']['timeout'], 'wsdl' => $sp515b8d['single_sign_on']['wsdl'], 'username' => $sp515b8d['single_sign_on']['username'], 'password' => $sp515b8d['single_sign_on']['password'], 'credentials' => array('username' => $sp738ed2, 'password' => $sp379388)); if (class_exists('Netforum\\Views\\NetforumCache')) { $sp515b8d = get_option('netforum_cache'); $sp172646 += array('cache' => array('path' => __DIR__ . '/tmp/', 'secret' => $sp515b8d['cache']['key'], 'ttl' => $sp515b8d['cache']['ttl'])); } $sp6826cb = new \Netforum\Providers\ServiceProvider($sp172646); if (property_exists($sp6826cb, 'auth')) { $this->ssoToken = $sp6826cb->auth->getSsoToken(); return $sp6826cb->onDemand->getCustomerByKey(); } else { $this->ssoToken = $sp6826cb->simple->getSsoToken(); return $sp6826cb->simple->getCustomerByKey(); } } private function sp95e50c($sp244044, $sp27d7d8) { global $wpdb; if ($sp244044 <= 0) { return false; } $sp7ba6e5 = $wpdb->get_row(sprintf('select * from %s where meta_value like "%s" limit 1', $wpdb->usermeta, '%\\"cst_id\\";i:' . (int) esc_sql($sp244044) . ';%')); if (!is_object($sp7ba6e5)) { return false; } return $sp27d7d8 != $sp7ba6e5->user_id ? $sp7ba6e5->user_id : false; } }
+<?php namespace NetAuth;
+
+class Authenticate
+{
+    private $ssoToken;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        add_filter('authenticate', [$this, 'validate'], 10, 3);
+    }
+
+    /**
+     * @param $user
+     * @param $username
+     * @param $password
+     * @return bool|\WP_Error|\WP_User
+     */
+    public function validate($user, $username, $password)
+    {
+        if ( empty($username) || empty($password) ) {
+            return false;
+        }
+
+        try {
+            $user = get_user_by('login', $username);
+
+            // nf meta wont exist if its a local wp user.
+            $meta = get_user_meta($user->ID, 'netforum', true);
+
+            // let regular wp users sign in.
+            if ( is_object($user) && empty($meta) ) {
+                return false;
+            }
+
+            // external authentication
+            $nf = $this->authenticate($username, $password);
+
+            // reference.
+            $uData = [
+                'user_email' => strtolower($nf->EmailAddress),
+                'user_login' => strtolower($nf->EmailAddress),
+                'first_name' => ucwords($nf->ind_first_name),
+                'last_name'  => ucwords($nf->ind_last_name),
+                'nickname'   => ucwords($nf->ind_first_name) . ' ' .
+                    ucwords($nf->ind_last_name),
+                ''
+            ];
+
+            // add new user if authenticated.
+            if ( !is_object($user) ) {
+                // sync user
+                // useful if email or names were changed on nf.
+                if ( $syncId = $this->isSyncNeeded($nf->cst_id, $user->ID) ) {
+
+                    global $wpdb;
+                    // update user login.
+                    $wpdb->update($wpdb->users, array_slice($uData, 0, 2), [
+                        'ID' => $syncId
+                    ]);
+
+                    // update user meta data.
+                    $user = new \WP_User(wp_update_user([
+                            'ID' => $syncId
+                        ] + $uData
+                    ));
+
+                } else {
+                    // create new user.
+                    $user = new \WP_User(wp_insert_user($uData));
+                }
+            } else {
+                // update user meta data on each login.
+                // first, last names could have changed.
+                wp_update_user($uData + [
+                        'ID' => $user->ID
+                    ]);
+            }
+
+            // add sso to meta & session.
+            $this->setSession($nf, $user);
+
+            // add call for groups plugin
+            do_action('nf_SyncGroups');
+        }
+        catch (\Exception $e) {
+            // comment, if you wish to fall back on WordPress authentication
+            remove_action('authenticate', 'wp_authenticate_username_password', 20);
+            $user = new \WP_Error('denied', __('Uh Oh!<br> ' . $e->getMessage()));
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param $nf
+     * @param $user
+     */
+    protected function setSession($nf, $user)
+    {
+        $params = [
+            'cst_id'    => (int) $nf->cst_id,
+            'cst_key'   => (string) $nf->cst_key,
+            'sso_token' => $this->ssoToken
+        ];
+
+        // add to meta
+        update_user_meta($user->ID, 'netforum', $params);
+
+        // add to session.
+        if ( !session_id() )
+            session_start();
+
+        $_SESSION += [
+            'netforum' => $nf
+        ];
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function authenticate($username, $password)
+    {
+        $opt = get_option('netforum');
+        if ( !is_array($opt) || empty($opt['single_sign_on']['wsdl']) ) {
+            throw new \Exception('Something went wrong, netforum xweb credentials not set.');
+        }
+
+        $conf = [
+            'debug'       => false,
+            'ttl'         => 12,
+            'timeout'     => $opt['connection']['timeout'],
+            'wsdl'        => $opt['single_sign_on']['wsdl'],
+            'username'    => $opt['single_sign_on']['username'],
+            'password'    => $opt['single_sign_on']['password'],
+            'credentials' => [
+                'username' => $username,
+                'password' => $password
+            ],
+        ];
+
+        // full version support.
+        if ( class_exists('Netforum\Views\NetforumCache') ) {
+            $opt = get_option('netforum_cache');
+            $conf += ['cache' => [
+                'path'   => __DIR__ . '/tmp/',
+                'secret' => $opt['cache']['key'],
+                'ttl'    => $opt['cache']['ttl'],
+            ]];
+        }
+
+        $nf = new \Netforum\Providers\ServiceProvider($conf);
+
+        // basic vs full version support.
+        if ( property_exists($nf, 'auth') ) {
+            // inherit sso.
+            $this->ssoToken = $nf->auth->getSsoToken();
+            return $nf->onDemand->getCustomerByKey();
+        } else {
+            $this->ssoToken = $nf->simple->getSsoToken();
+            return $nf->simple->getCustomerByKey();
+        }
+    }
+
+    /**
+     * @param $cstId
+     * @param $userId
+     * @return bool
+     */
+    private function isSyncNeeded($cstId, $userId)
+    {
+        global $wpdb;
+
+        if ( $cstId <= 0 ) {
+            return false;
+        }
+
+        $q = $wpdb->get_row(
+            sprintf('select * from %s where meta_value like "%s" limit 1',
+                $wpdb->usermeta,
+                '%\"cst_id\";i:' . (int) esc_sql($cstId) . ';%'
+            ));
+
+        if ( !is_object($q) ) {
+            return false;
+        }
+
+        // sync
+        return $userId != $q->user_id
+            ? $q->user_id
+            : false;
+    }
+}

@@ -1,2 +1,21 @@
-<?php
-namespace NetAuth\Views; use WP\Views\View; use WP\Views\Page; class NetforumHelp extends View { protected $fields = array(); public function __construct() { $this->sp16b150(); } private function sp16b150() { include_once Page::getTemplatesPath(__DIR__) . '/help.tpl'; } }
+<?php namespace NetAuth\Views;
+
+use WP\Views\View;
+use WP\Views\Page;
+
+class NetforumHelp extends View
+{
+    protected $fields = [];
+
+    public function __construct()
+    {
+        $this->publish();
+    }
+
+    private function publish()
+    {
+        include_once(
+            Page::getTemplatesPath(__DIR__) . '/help.tpl'
+        );
+    }
+}

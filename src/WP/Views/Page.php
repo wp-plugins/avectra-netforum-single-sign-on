@@ -1,2 +1,161 @@
-<?php
-namespace WP\Views; use WP\Traits\Helpers; class Page { use Helpers; public static $default; public static $static; public function __construct() { self::set('caller', get_called_class()); $spf454e5 = array('nf_logo' => 'getHeaderLogo', 'nf_head' => 'getHeader', 'nf_tabs' => 'getTabs', 'nf_foot' => 'getFooter'); add_action('admin_menu', array($this, 'makeView')); array_walk($spf454e5, function ($sp4312bc, $sp52c592) { if (method_exists(self::get('caller'), $sp4312bc)) { add_action($sp52c592, array(self::get('caller'), $sp4312bc)); } }); } public static function getTpl() { $sp00276a = self::get('namespace') . '\\' . ucfirst(camel_case(self::get('page'))); class_exists($sp00276a) ? add_action('nf_body', array($sp00276a, 'getInstance')) : null; include_once self::get('templatePath') . '/main.tpl'; if (!class_exists($sp00276a)) { dd('class ' . $sp00276a . ' doesn\'t exist.'); } } public static function makeView() { self::bootstrap(); $sp0bb1ac = self::get('caller'); array_walk($sp0bb1ac::$plugin, function ($sp4312bc, $sp52c592) use($sp0bb1ac) { if (!self::isMenuItemExists($sp52c592)) { add_menu_page(ucwords($sp52c592), $sp52c592, 'manage_options', $sp4312bc['uri'], array($sp0bb1ac, 'getTpl'), self::get('assetsUrl') . $sp4312bc['menu_logo']); } array_walk($sp4312bc['pages'], function ($sp16c10a, $spb37f21) use($sp4312bc, $sp0bb1ac) { add_submenu_page($sp4312bc['uri'], ucwords($spb37f21), ucwords($spb37f21), 'manage_options', $sp16c10a, array($sp0bb1ac, 'getTpl')); }); }); } public static function isMenuItemExists($spf0d987) { global $menu; $spe5b405 = false; array_walk($menu, function ($sp4312bc) use($spf0d987, &$spe5b405) { if (preg_match('/^' . trim($spf0d987) . '$/i', $sp4312bc[0])) { $spe5b405 = true; } }); return $spe5b405; } protected static function makeTab($sp1c23ac, $spb37f21, $spf39713 = null) { $sp49c648 = $spb37f21 == self::getCurrentPage() ? 'nav-tab-active' : ''; printf('<a class=\'nav-tab %s\' href=\'?page=%s\' title=\'%s\'>%s</a>', $sp49c648, is_null($spb37f21) ? self::getCurrentPage() : $spb37f21, ucfirst($spf39713), ucwords($sp1c23ac)); } public static function getTabs() { $sp0bb1ac = self::get('caller'); array_walk(array_shift($sp0bb1ac::$plugin)['pages'], function ($sp16c10a, $spb37f21) { self::makeTab($spb37f21, $sp16c10a); }); } }
+<?php namespace WP\Views;
+
+use WP\Traits\Helpers;
+
+/**
+ * Class Page
+ *
+ * @package WP\Views
+ */
+class Page
+{
+    use Helpers;
+
+    /**
+     * @var
+     */
+    public static $default;
+    /**
+     * @var
+     */
+    public static $static;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        self::set('caller', get_called_class());
+
+        $actions = [
+            'nf_logo' => 'getHeaderLogo',
+            'nf_head' => 'getHeader',
+            'nf_tabs' => 'getTabs',
+            'nf_foot' => 'getFooter',
+        ];
+
+        add_action('admin_menu', [$this, 'makeView']);
+        array_walk($actions, function ($v, $k) {
+            if ( method_exists(self::get('caller'), $v) ) {
+                add_action($k, [self::get('caller'), $v]);
+            }
+        });
+    }
+
+    /**
+     * This function is basically the construct()
+     * getTpl() is used as static and we getInstance
+     * once instance is initiated actual construct
+     * comes into play.
+     */
+    static public function getTpl()
+    {
+        // initiate the instance via the caller page.
+        // caller page is extending WP\Views\View and
+        // it uses singleton so we can call getInstance().
+        $obj = self::get('namespace') . '\\' . ucfirst(camel_case(self::get('page')));
+        class_exists($obj)
+            ? add_action('nf_body', [$obj, 'getInstance'])
+            : null;
+
+        include_once(self::get('templatePath') . '/main.tpl');
+
+        /*dd('dynamic page: ' . self::get('page'));
+        dd('nf_tabs did action: ' . did_action('nf_tabs'));
+        dd('nf_body did action: ' . did_action('nf_body'));*/
+        if ( !class_exists($obj) ) {
+            dd('class ' . $obj . ' doesn\'t exist.');
+        }
+    }
+
+    /**
+     *
+     */
+    static public function makeView()
+    {
+        // bootstrap the plugin.
+        // sets plugin paths using reflection ;)
+        self::bootstrap();
+        /////////////
+
+        $caller = self::get('caller');
+        //dd(__FUNCTION__ . ' caller: ' . $caller);
+        array_walk($caller::$plugin, function ($v, $k) use ($caller) {
+
+            // if menu item doesnt exist only then
+            // add main menu item.
+            if ( !self::isMenuItemExists($k) ) {
+                add_menu_page(
+                    ucwords($k), $k,
+                    'manage_options', $v['uri'],
+                    [$caller, 'getTpl'],
+                    self::get('assetsUrl') . $v['menu_logo']
+                );
+            }
+
+            array_walk($v['pages'], function ($uri, $page) use ($v, $caller) {
+                add_submenu_page(
+                    $v['uri'],
+                    ucwords($page), ucwords($page),
+                    'manage_options',
+                    $uri, [$caller, 'getTpl']
+                );
+            });
+        });
+    }
+
+    /**
+     * @param $item
+     * @return bool
+     */
+    static public function isMenuItemExists($item)
+    {
+        global $menu;
+
+        $exists = false;
+        array_walk($menu, function ($v) use ($item, &$exists) {
+            if ( preg_match('/^' . trim($item) . '$/i', $v[0]) ) {
+                $exists = true;
+            }
+        });
+
+        return $exists;
+    }
+
+    /**
+     * @param      $tab
+     * @param      $page
+     * @param null $desc
+     */
+    static protected function makeTab($tab, $page, $desc = null)
+    {
+        $active = $page == self::getCurrentPage()
+            ? 'nav-tab-active'
+            : '';
+
+        printf("<a class='nav-tab %s' href='?page=%s' title='%s'>%s</a>",
+            $active,
+            is_null($page)
+                ? self::getCurrentPage()
+                : $page,
+            ucfirst($desc),
+            ucwords($tab)
+        );
+    }
+
+    /**
+     *
+     */
+    static public function getTabs()
+    {
+        $caller = self::get('caller');
+        //$caller = self::$caller;
+        //dd("CALLER: " . $caller);
+        //dd(array_shift($caller::$plugin)['pages']);
+        array_walk(array_shift($caller::$plugin)['pages'],
+            function ($uri, $page) {
+                self::makeTab($page, $uri);
+            }
+        );
+    }
+}

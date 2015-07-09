@@ -1,2 +1,100 @@
-<?php
-namespace WP\Views; abstract class Form { protected $wp; protected function store() { $sp6b80a7 = $_POST[$this->page]; array_walk_recursive($sp6b80a7, array($this, 'sanitize')); return add_option($this->page, $sp6b80a7) || update_option($this->page, $sp6b80a7); } protected function validate() { if (!isset($_POST[$this->page])) { return false; } $sp6b80a7 = $_POST[$this->page]; $this->wp = new \WP_Error(); foreach ($this->fields as $sp86203c => $sp47776e) { $sp86203c = $this->toSlug($sp86203c); foreach ($sp47776e['fields'] as $sp3405f9 => $sp56ff31) { $sp3405f9 = $this->toSlug($sp3405f9); if (isset($sp56ff31['required']) && $sp56ff31['required']) { if (!is_null($sp6b80a7[$sp86203c][$sp3405f9]) && trim($sp6b80a7[$sp86203c][$sp3405f9]) == '') { $this->wp->add($sp3405f9, __($sp56ff31['title'] . ' cannot be left empty.')); continue; } } if (isset($sp56ff31['validate']) && !is_null($sp56ff31['validate'])) { if (!is_array($sp56ff31['validate'])) { continue; } if (!preg_match('/^' . current($sp56ff31['validate']) . '$/is', $sp6b80a7[$sp86203c][$sp3405f9])) { $spd852e6 = end($sp56ff31['validate']) != '' ? end($sp56ff31['validate']) : 'must be valid characters.'; $this->wp->add($sp3405f9, __($sp56ff31['title'] . ' ' . $spd852e6)); continue; } } } } return sizeof($this->wp->get_error_codes()) <= 0; } protected function flash($sp8159b3 = false, $spd852e6 = null) { if ($sp8159b3) { return printf('<div id="message" class="%s"><p><strong>%s</strong></p><p>%s</p></div>', $sp8159b3 ? 'error' : 'updated', $sp8159b3 ? __('Uh oh!') : __('Yay!'), __(implode('<br>', $this->wp->get_error_messages()))); } return printf('<div id="message" class="%s"><p><strong>%s</strong></p><p>%s</p></div>', 'updated', 'Yay!', is_null($spd852e6) ? __('Your request has been processed successfully.') : __($spd852e6)); } protected function sanitize(&$sp55070e) { return $sp55070e = trim(stripslashes(sanitize_text_field($sp55070e))); } }
+<?php namespace WP\Views;
+
+abstract class Form
+{
+    protected $wp;
+
+    /**
+     * @return bool
+     */
+    protected function store()
+    {
+        $post = $_POST[$this->page];
+        array_walk_recursive($post,
+            [$this, 'sanitize']
+        );
+
+        return add_option($this->page, $post)
+        || update_option($this->page, $post);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function validate()
+    {
+        if ( !isset($_POST[$this->page]) ) {
+            return false;
+        }
+
+        $post = $_POST[$this->page];
+        $this->wp = new \WP_Error();
+
+        foreach ($this->fields as $key => $section) {
+            $key = $this->toSlug($key);  // incase its not.
+            foreach ($section['fields'] as $field => $option) {
+                $field = $this->toSlug($field); // incase its not.
+                /*dd('type: ' . gettype($post[$key][$field]));
+                dd('key[field]: ' . $key . '['.$field.']');
+                dd('val: ' . $post[$key][$field]);*/
+                if ( isset($option['required']) && $option['required'] ) {
+                    // if field is !null but only empty.
+                    if ( !is_null($post[$key][$field]) && trim($post[$key][$field]) == "" ) {
+                        $this->wp->add($field, __($option['title'] . ' cannot be left empty.'));
+                        continue;
+                    }
+                }
+                if ( isset($option['validate']) && !is_null($option['validate']) ) {
+                    if ( !is_array($option['validate']) )
+                        continue;
+
+                    if ( !preg_match('/^' . current($option['validate']) . '$/is', $post[$key][$field]) ) {
+
+                        $msg = (end($option['validate']) != '')
+                            ? end($option['validate'])
+                            : 'must be valid characters.';
+
+                        $this->wp->add($field, __($option['title'] . ' ' . $msg));
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return sizeof($this->wp->get_error_codes()) <= 0;
+    }
+
+    /**
+     * @param bool $error
+     * @param null $msg
+     * @return int
+     */
+    protected function flash($error = false, $msg = null)
+    {
+        if ( $error ) {
+            return printf('<div id="message" class="%s"><p><strong>%s</strong></p><p>%s</p></div>',
+                $error ? 'error' : 'updated',
+                $error ? __('Uh oh!') : __('Yay!'),
+                __(implode('<br>', $this->wp->get_error_messages()))
+            );
+        }
+
+        return printf('<div id="message" class="%s"><p><strong>%s</strong></p><p>%s</p></div>',
+            'updated',
+            'Yay!',
+            is_null($msg)
+                ? __('Your request has been processed successfully.')
+                : __($msg)
+        );
+    }
+
+    /**
+     * @param $e
+     * @return string
+     */
+    protected function sanitize(&$e)
+    {
+        return $e = trim(stripslashes(sanitize_text_field($e)));
+    }
+
+}
